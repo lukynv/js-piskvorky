@@ -3,10 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Piškvorky</title>
+    <style>
+        #mainmenu
+        {
+            text-align: center;
+            border: 5px outset black;
+        }
+    </style>
 </head>
 <body>
+<div id="mainmenu">
+    <h1>PIŠKVORKY</h1><hr />
+    <!-- Hotseat nebo online mod --> <p>Mód:
+    <input type="radio" name="mode" value="Hotseat" />Hotseat<br>
+    <input type="radio" name="mode" value="Online" />Online</p>
+    <!-- Počet hráčů (2+, vlastní barvy) --><p>Počet hráčů:
+    <input type="number" name="players" min="2" /></p>
+    <!-- Velikost hracího pole (5+) --><p>Velikost hracího pole:
+    <input type="number" name="playfield" min="5" /></p>
+    <!-- Win condition - počet polí nutných k vítězství (3+) --><p>Polí k vítězství:
+    <input type="number" name="winfield" min="3" /></p>
+</div>
 
+<script>
 
+</script>
 
 </body>
 </html>
