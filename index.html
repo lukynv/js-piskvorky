@@ -9,25 +9,90 @@
             text-align: center;
             border: 5px outset black;
         }
+        #gametable *
+        {
+            text-align: center;
+            border: 1px solid black;
+        }
     </style>
-</head>
-<body>
-<div id="mainmenu">
-    <h1>PIŠKVORKY</h1><hr />
-    <!-- Hotseat nebo online mod --> <p>Mód:
-    <input type="radio" name="mode" value="Hotseat" />Hotseat<br>
-    <input type="radio" name="mode" value="Online" />Online</p>
-    <!-- Počet hráčů (2+, vlastní barvy) --><p>Počet hráčů:
-    <input type="number" name="players" min="2" /></p>
-    <!-- Velikost hracího pole (5+) --><p>Velikost hracího pole:
-    <input type="number" name="playfield" min="5" /></p>
-    <!-- Win condition - počet polí nutných k vítězství (3+) --><p>Polí k vítězství:
-    <input type="number" name="winfield" min="3" /></p>
-</div>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js">
+    </script>
 
+</head>
+<body style="background-color: lightblue">
+<h1>PIŠKVORKY</h1><hr />
+<form id="mainmenu" action="" onsubmit="return false;">
+    <!-- Hotseat nebo online mod --> <p>Mód:
+    <input type="radio" id="mode_hotseat" name="mode" value="Hotseat" />Hotseat<br>
+    <input type="radio" id="mode_online" name="mode" value="Online" />Online</p>
+    <!-- Počet hráčů (2+, vlastní barvy) --><p>Počet hráčů:
+    <input type="number" id="players" min="2" value="2" /></p>
+    <!-- Velikost hracího pole (5+) --><p>Velikost hracího pole:
+    <input type="number" id="playfield" min="5" value="5" /></p>
+    <!-- Win condition - počet polí nutných k vítězství (3+) --><p>Polí k vítězství:
+    <input type="number" id="winfield" min="3" value="3" /></p>
+    <button id="play">PLAY</button>
+</form>
+
+<canvas id="playfieldCanvas">
+
+</canvas>
+    NEJEDE TO
 <script>
+    var playfieldCanvas = $('#playfieldCanvas');
+    var config = {
+            mode : "hotseat",
+            players : $('#players').val(),
+            playfield : $('#playfield').val(),
+            winfield : $('#winfield').val(),
+            width:10,
+            height:10
+    };
+
+    function config_set() {                                // Nastavit proměnné
+        if($('#mode_online').prop('checked'))
+        {config.mode = "online";} else {config.mode="hotseat";}  // herní mód
+        config.players = $('#players').val();          // počet hráčů
+        config.playfield = $('#playfield').val();      // hrací oblast
+        config.winfield = $('#winfield').val();        // počet polí pro vítězství
+        console.log("mód:",config.mode,
+                "hráči:",config.players,
+                "hřiště:",config.playfield,"x",config.playfield,
+                "vítězství:",config.winfield);
+        console.log("CONFIG DONE");
+    }
+
+    function drawPlayfield() {
+        playfieldCanvas.clearRect(0,0,50,50);  //sračka, nevim jestli s kanvasem
+        playfieldCanvas.text = "baf";
+    }
+
+    function init(){
+        for(i=0; i < playfield; i++)
+        {
+            $('<tr id="row000"></tr>').appendTo( $('#gametable') );
+            for(i=0; i < playfield; i++)
+            {
+                $('<td></td>').appendTo( $('#row000') );
+            }
+        }
+    }
+
+    $('#play').on('click', function()   // Po kliknutí na PLAY
+    {
+        config_set();
+        init();
+        drawPlayfield();
+
+    });
+
 
 </script>
+
+
+
+
+
 
 </body>
 </html>
