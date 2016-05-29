@@ -32,96 +32,200 @@
     <input type="radio" id="mode_hotseat" name="mode" value="Hotseat" checked="true" />Hotseat<br>
     <input type="radio" id="mode_online" name="mode" value="Online" />Online</p>
     <!-- Počet hráčů (2+, vlastní barvy) --><p>Počet hráčů:
-    <input type="number" id="players" min="2" value="2" /></p>
+    <input type="number" id="playersN" min="2" value="2" /></p>
     <!-- Velikost hracího pole (5+) --><p>Velikost hracího pole:
     <input type="number" id="playfieldN" min="5" value="5" /></p>
     <!-- Win condition - počet polí nutných k vítězství (3+) --><p>Polí k vítězství:
-    <input type="number" id="winfield" min="3" value="3" /></p>
+    <input type="number" id="winfieldN" min="3" value="3" /></p>
     <button id="play">PLAY</button>
 </form><hr />
-
+<table>
+    <tr><td>Tahy: </td><td id="turnCounter">0</td></tr>
+    <tr><td>Hráč: </td><td id="turnPlayerInfo">0</td></tr>
+</table>
 <div id="playfield" class="nobr" width="500" height="500"></div>
 
 
+<!--for(var i=0;i<config.playfield;i++)
+        {
+            var x=i;
+            $('<div></div>').attr({row: x, id: x}).appendTo(playfield);
+            for(var n=0;n<config.playfield;n++){
+                var x=i; var y=n;
+                $('<canvas></canvas>')
+                        .attr({width: config.width,
+                            height: config.height,
+                            onclick: 'playfieldClicked('+x+','+y+')',
+                            id: x+'x'+y})
+                        .appendTo($("#"+x));
+            }
 
+        }
+-->
+
+
+
+                                    <!-- JAVASCRIPT -->
 <script>
-    //var playfieldCanvasND = document.getElementById("playfieldCanvas");
-    //var playfieldC = playfieldCanvasND.getContext("2d");
-    var playfield   =   $('#playfield');
+    var playfield   =   $('#playfield');                            // Proměnné
+    var turnCounter   =   $('#turnCounter');
+    var turnPlayerInfo  =   $('#turnPlayerInfo');
+    var players = [Player0 = {}, Player1 = {}];
+    var turns = 0;
+    var activePlayer = "Nobody";
+    var activePlayerN = 0;
 
-
-    var config = {
+    var config = {                                                  // CONFIG
             mode : "hotseat",
-            players : $('#players').val(),
+            players : $('#playersN').val(),
             playfield : $('#playfieldN').val(),
-            winfield : $('#winfield').val(),
+            winfield : $('#winfieldN').val(),
             width:28,
             height:28
     };
 
-    function config_set() {                                // Nastavit proměnné
-        if($('#mode_online').prop('checked'))
-        {config.mode = "online";} else {config.mode="hotseat";}  // herní mód
-        config.players = $('#players').val();          // počet hráčů
-        config.playfield = $('#playfieldN').val();      // hrací oblast
-        config.winfield = $('#winfield').val();        // počet polí pro vítězství
-        console.log("mód:",config.mode,
-                "hráči:",config.players,
-                "hřiště:",config.playfield,"x",config.playfield,
-                "vítězství:",config.winfield);
-        console.log("CONFIG DONE");
+    function randomColor() {                                        // Generátor náhodné barvy
+        var colorletters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += colorletters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
 
-    function drawPlayfield() {
+    function init_config() {                                        // Nastavení CONFIGU
+        if($('#mode_online').prop('checked'))
+        {config.mode = "online";} else {config.mode="hotseat";}     // herní mód
+        config.players = $('#playersN').val();                      // počet hráčů
+        config.playfield = $('#playfieldN').val();                  // hrací oblast
+        config.winfield = $('#winfieldN').val();                    // počet polí pro vítězství
+        activePlayerN = 0;                                          // Číslo aktivního hráče
+        activePlayer = "Nobody";                                    // Název aktivního hráče
+        turns = 0;                                                  // uběhlé tahy
+        console.log(config.mode,config.players,config.playfield,config.winfield);
+        console.log("CONFIG DONE (mode, players, playfield, winfield");
+    }
+
+    function init_playfield() {                                         // Nastavení hřiště
         $('#playfield').empty();
-        //console.log($('#playfield'))
         for(var i=0;i<config.playfield;i++)
         {
+            var x=i;
+            $('<br />').attr({row: x}).appendTo(playfield);
             for(var n=0;n<config.playfield;n++){
-                //playfieldC.fillStyle = "#FF0000";
                 var x=i; var y=n;
-                $('<canvas></canvas>').attr({width: config.width,
-                    height: config.height,
-                    onclick: 'playfieldClicked('+x+','+y+')'}).appendTo(playfield);
+                $('<canvas></canvas>')
+                        .attr({width: config.width,
+                            height: config.height,
+                            onclick: 'playfieldClicked('+x+','+y+')',
+                            id: x+'x'+y})
+                        .appendTo(playfield);
             }
-            $('<br />').appendTo(playfield);
+
         }
     }
 
-    function init(){
-        for(i=0; i < config.playfield; i++)
-        {
-            $('<tr id="row000"></tr>').appendTo( $('#gametable') );
-            for(i=0; i < config.playfield; i++)
-            {
-                $('<td></td>').appendTo( $('#row000') );
-            }
+    function init_players(){                                            // Nastavení hráčů
+        players = [];
+        for(var i=0;i<config.players;i++){
+            var thisplayer="Player"+i;
+            players[i] = {name:thisplayer, color:randomColor()};
         }
+        console.log("Nastaveni hráči v poli players");
     }
 
-    $('#play').on('click', function()   // Po kliknutí na PLAY
+    function turn_move() {                                              // Začátek tahu
+        activePlayer = players[activePlayerN].name;
+        console.log("hraje:",activePlayer);
+
+    }
+
+    function turn_end() {                                               // Konec tahu
+        if(!checkWinCondition()) {
+            turns++;
+            if(activePlayerN < (config.players-1)){
+                activePlayerN++;
+            } else {
+                activePlayerN = 0;
+            }
+            updateInfo();
+            turn_move();}
+        else {alert('Vítěz: '+activePlayer+"\nSUCKEŘI")}
+    }
+
+    function updateInfo(){
+        turnCounter.empty().append(turns);
+        turnPlayerInfo.empty().append(activePlayer);
+        turnPlayerInfo.css('background-color', players[activePlayerN].color);
+    }
+
+
+    $('#play').on('click', function()                                   // Po kliknutí na PLAY
     {
-        config_set();
-        //init();
-        drawPlayfield();
+        init_config();
+        init_playfield();
+        init_players();
+        updateInfo();
+        if (config.mode = "hotseat"){
+            turn_move();
+        }
 
     });
 
-    function checkWinCondition() {
-        return false;
+    function checkWinCondition() {                                      // Vyzkoušení win-conditions
+        var currentcolor = turnPlayerInfo.css('background-color');
+        var currentcol;
+        var row; var col;
+        var i=0;
+        var rows = config.playfield; //$("canvas[id*='x0']").length;
+        var cols = rows;
+        var rowNcol;
+        for(row = 0; row < rows; row++){                                // Wincondition v řádku
+            for(col = 0; col < cols; col++){
+                rowNcol = "#"+row+"x"+col;
+                currentcol = $(rowNcol).css('background-color');
+                console.log(currentcol, currentcolor);
+                while(currentcol == currentcolor)
+                {
+                    col++; rowNcol = "#"+row+"x"+col;
+                    currentcol = $(rowNcol).css('background-color');
+                    i++;
+                    if(i==config.winfield){
+                        return true;
+                    }
+                }
+                i=0;
+            }
+        }
+        //                                                              // Wincondition v sloupci
+        
+        //return false;
     };
 
-    function playfieldClicked(x,y) {
+    var clickedstring;
+    function playfieldClicked(x,y) {                                    // Po kliknutí na herní pole
         console.log('Clicked', x,y);
-        
+        if(config.mode == "hotseat") {
+            clickedstring = '#'+x+'x'+y;
+            var clickedcanvas = $(clickedstring);
+            if(!clickedcanvas.attr('used')){
+                clickedcanvas.attr({style: 'background-color: '+players[activePlayerN].color, used:true});
+                console.log('Pole obarveno, hráč dokončil tah');
+                turn_end();
+            }
+            else {
+                console.log('Pole obsazeno, hráč nedokončil tah');
+                turn_move();
+            }
+        }
     };
 
 
 </script>
 
 
-
-
+<!--tak to je humus boyz
+-->
 
 
 </body>
