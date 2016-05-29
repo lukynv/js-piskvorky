@@ -8,52 +8,62 @@
         {
             text-align: center;
             border: 5px outset black;
+            background-color: lightblue;
         }
-        #gametable *
+        #playfield *
         {
             text-align: center;
             border: 1px solid black;
+        }
+        .nobr
+        {
+            white-space: nowrap;
+            line-height: 0%;
         }
     </style>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js">
     </script>
 
 </head>
-<body style="background-color: lightblue">
+<body>
 <h1>PIŠKVORKY</h1><hr />
 <form id="mainmenu" action="" onsubmit="return false;">
     <!-- Hotseat nebo online mod --> <p>Mód:
-    <input type="radio" id="mode_hotseat" name="mode" value="Hotseat" />Hotseat<br>
+    <input type="radio" id="mode_hotseat" name="mode" value="Hotseat" checked="true" />Hotseat<br>
     <input type="radio" id="mode_online" name="mode" value="Online" />Online</p>
     <!-- Počet hráčů (2+, vlastní barvy) --><p>Počet hráčů:
     <input type="number" id="players" min="2" value="2" /></p>
     <!-- Velikost hracího pole (5+) --><p>Velikost hracího pole:
-    <input type="number" id="playfield" min="5" value="5" /></p>
+    <input type="number" id="playfieldN" min="5" value="5" /></p>
     <!-- Win condition - počet polí nutných k vítězství (3+) --><p>Polí k vítězství:
     <input type="number" id="winfield" min="3" value="3" /></p>
     <button id="play">PLAY</button>
-</form>
+</form><hr />
 
-<canvas id="playfieldCanvas">
+<div id="playfield" class="nobr" width="500" height="500"></div>
 
-</canvas>
-    NEJEDE TO
+
+
 <script>
-    var playfieldCanvas = $('#playfieldCanvas');
+    //var playfieldCanvasND = document.getElementById("playfieldCanvas");
+    //var playfieldC = playfieldCanvasND.getContext("2d");
+    var playfield   =   $('#playfield');
+
+
     var config = {
             mode : "hotseat",
             players : $('#players').val(),
-            playfield : $('#playfield').val(),
+            playfield : $('#playfieldN').val(),
             winfield : $('#winfield').val(),
-            width:10,
-            height:10
+            width:28,
+            height:28
     };
 
     function config_set() {                                // Nastavit proměnné
         if($('#mode_online').prop('checked'))
         {config.mode = "online";} else {config.mode="hotseat";}  // herní mód
         config.players = $('#players').val();          // počet hráčů
-        config.playfield = $('#playfield').val();      // hrací oblast
+        config.playfield = $('#playfieldN').val();      // hrací oblast
         config.winfield = $('#winfield').val();        // počet polí pro vítězství
         console.log("mód:",config.mode,
                 "hráči:",config.players,
@@ -63,15 +73,26 @@
     }
 
     function drawPlayfield() {
-        playfieldCanvas.clearRect(0,0,50,50);  //sračka, nevim jestli s kanvasem
-        playfieldCanvas.text = "baf";
+        $('#playfield').empty();
+        //console.log($('#playfield'))
+        for(var i=0;i<config.playfield;i++)
+        {
+            for(var n=0;n<config.playfield;n++){
+                //playfieldC.fillStyle = "#FF0000";
+                var x=i; var y=n;
+                $('<canvas></canvas>').attr({width: config.width,
+                    height: config.height,
+                    onclick: 'playfieldClicked('+x+','+y+')'}).appendTo(playfield);
+            }
+            $('<br />').appendTo(playfield);
+        }
     }
 
     function init(){
-        for(i=0; i < playfield; i++)
+        for(i=0; i < config.playfield; i++)
         {
             $('<tr id="row000"></tr>').appendTo( $('#gametable') );
-            for(i=0; i < playfield; i++)
+            for(i=0; i < config.playfield; i++)
             {
                 $('<td></td>').appendTo( $('#row000') );
             }
@@ -81,10 +102,19 @@
     $('#play').on('click', function()   // Po kliknutí na PLAY
     {
         config_set();
-        init();
+        //init();
         drawPlayfield();
 
     });
+
+    function checkWinCondition() {
+        return false;
+    };
+
+    function playfieldClicked(x,y) {
+        console.log('Clicked', x,y);
+        
+    };
 
 
 </script>
