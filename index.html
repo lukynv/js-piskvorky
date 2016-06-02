@@ -75,6 +75,8 @@
     var activePlayer = "Nobody";
     var activePlayerN = 0;
 
+    turnPlayerInfo.empty().append(activePlayer);
+
     var config = {                                                  // CONFIG
             mode : "hotseat",
             players : $('#playersN').val(),
@@ -137,17 +139,18 @@
     function turn_move() {                                              // Začátek tahu
         activePlayer = players[activePlayerN].name;
         console.log("hraje:",activePlayer);
-
+        if(activePlayerN < (config.players-1)){
+            activePlayerN++;
+        } else {
+            activePlayerN = 0;
+        }
+        updateInfo();
     }
 
     function turn_end() {                                               // Konec tahu
         if(!checkWinCondition()) {
             turns++;
-            if(activePlayerN < (config.players-1)){
-                activePlayerN++;
-            } else {
-                activePlayerN = 0;
-            }
+
             updateInfo();
             turn_move();}
         else {alert('Vítěz: '+activePlayer+"\nSUCKEŘI")}
@@ -165,8 +168,9 @@
         init_config();
         init_playfield();
         init_players();
+
         updateInfo();
-        if (config.mode = "hotseat"){
+        if (config.mode == "hotseat"){
             turn_move();
         }
 
@@ -175,6 +179,7 @@
     function checkWinCondition() {                                      // Vyzkoušení win-conditions
         var currentcolor = turnPlayerInfo.css('background-color');
         var currentcol;
+        var currentrow;
         var row; var col;
         var i=0;
         var rows = config.playfield; //$("canvas[id*='x0']").length;
@@ -197,8 +202,60 @@
                 i=0;
             }
         }
-        //                                                              // Wincondition v sloupci
-        
+        i=0;
+        for(col = 0; col<cols; col++){                                                          // Wincondition v sloupci
+            for(row = 0; row<rows; row++){
+                rowNcol = "#"+row+"x"+col;
+                currentrow = $(rowNcol).css('background-color');
+                console.log(currentrow, currentcolor);
+                while(currentrow == currentcolor)
+                {
+                    row++; rowNcol = "#"+row+"x"+col;
+                    currentrow = $(rowNcol).css('background-color');
+                    i++;
+                    if(i==config.winfield){
+                        return true;
+                    }
+                }
+                i=0;
+            }
+        }
+        i=0;
+        for(col = 0; col<(cols-(config.winfield-1)); col++){                                                          // Wincondition v sloupci
+            for(row = 0; row<(rows-(config.winfield-1)); row++){
+                rowNcol = "#"+row+"x"+col;
+                currentrow = $(rowNcol).css('background-color');
+                console.log(currentrow, currentcolor);
+                while(currentrow == currentcolor)
+                {
+                    row++; col++; rowNcol = "#"+row+"x"+col;
+                    currentrow = $(rowNcol).css('background-color');
+                    i++;
+                    if(i==config.winfield){
+                        return true;
+                    }
+                }
+                i=0;
+            }
+        }
+        for(col = (config.playfield-1); col>(0+(config.winfield-2)); col--){                                                          // Wincondition v sloupci
+            for(row = 0; row<(rows-(config.winfield-1)); row++){
+                rowNcol = "#"+row+"x"+col;
+                currentrow = $(rowNcol).css('background-color');
+                console.log(currentrow, currentcolor);
+                while(currentrow == currentcolor)
+                {
+                    row++; col--; rowNcol = "#"+row+"x"+col;
+                    currentrow = $(rowNcol).css('background-color');
+                    i++;
+                    if(i==config.winfield){
+                        return true;
+                    }
+                }
+                i=0;
+            }
+        }
+
         //return false;
     };
 
